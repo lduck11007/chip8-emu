@@ -35,6 +35,7 @@
 *.i*86
 *.x86_64
 *.hex
+*.asm
 
 # Debug files
 *.dSYM/
@@ -56,3 +57,4 @@ src/test*
 src/main*
 src/helloworld*
 src/test2*
+*.bak

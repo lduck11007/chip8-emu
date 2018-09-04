@@ -3,7 +3,7 @@
 typedef struct cpuState {
     unsigned short opcode;
     unsigned char memory[4096];
-    unsigned char v[16];
+    unsigned char v[16]; //v0 -> vF
     unsigned short index;
     unsigned short pc; //program counter
     unsigned char gfx[64 * 32]; //graphics buffer
@@ -19,13 +19,30 @@ void run(cpuState* cpu){
     unsigned char* next = &cpu->memory[cpu->pc+1];
     unsigned short opcode = *first << 8 | *next; //combine both bytes into single instruction
     unsigned int ident = (*first & 0xF0) >> 4; //First half-byte of opcode, identifier.
-    printf("%x\t%x\t%x\t%x\n", ident, opcode, *first, *next);
+    //printf("%x\t%x\t%x\t%x\t\t%x\n", ident, opcode, *first, *next, cpu->pc);
+    //printf("%d\n", cpu->gfx[3]);
     if(opcode == 0) //null opcode
         cpu->nullCount += 1;
     else
         cpu->nullCount = 0;
-    if(cpu->nullCount >= 5) //exit if more than 5 null bytes in a row
+    if(cpu->nullCount >= 4) //exit if 4 null bytes in a row
         exit(0);
+    switch(ident){
+        case 0x0: 
+            switch(*next){
+                case 0xE0:
+                    memset(cpu->gfx, 0, sizeof(cpu->gfx)); 
+                    break;
+                case 0xEE:
+                    cpu->pc = (cpu->stack[cpu->sp]) - 2; //accounting for increment of pc at end of instruction
+                    cpu->sp = 0;
+                    break;
+                case 0x0:
+                printf("NOP, skipping\n"); break;
+            } break;
+        default:
+            printf("Skipping op %04x\n", opcode);
+    }
     cpu->pc += 2; //advance 2 bytes (instructions are 2 bytes long) 
 
 }
