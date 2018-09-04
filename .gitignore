@@ -50,5 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-src/test
-src/main
+
+#local binaries for testing
+src/test*
+src/main*
+src/helloworld*
+src/test2*
