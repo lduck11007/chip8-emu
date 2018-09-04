@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "main.h"
 
 typedef struct cpuState {
     unsigned short opcode;
@@ -32,21 +32,21 @@ void initializeCpu(cpuState* cpu){
     cpu->sp = 0;
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
     cpuState cpu;
     cpuState* cpuPtr = &cpu;
-    FILE * f;
+    FILE* f;
     unsigned char buffer[4096];
     if (argc == 1) {
         printf("Useage: chip8 [file]\n");
-        return 1;
+        exit(1);
     }
     f = fopen(argv[1], "rb");
     if (f)
         fread(buffer+0x200, 4096, 1, f); //offset of 0x200 at buffer
     else {
         printf("Error: could not open file\n");
-        return 1;
+        exit(1);
     }
     for (int i = 0; i < 4096; i++)
         cpuPtr->memory[i] = buffer[i];
