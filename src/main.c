@@ -30,16 +30,24 @@ void run(cpuState* cpu){
     switch(ident){
         case 0x0: 
             switch(*next){
-                case 0xE0:
+                case 0xE0:          //00E0 - CLS
                     memset(cpu->gfx, 0, sizeof(cpu->gfx)); 
                     break;
-                case 0xEE:
+                case 0xEE:          //00EE - RET
                     cpu->pc = (cpu->stack[cpu->sp]) - 2; //accounting for increment of pc at end of instruction
                     cpu->sp = 0;
                     break;
-                case 0x0:
-                printf("NOP, skipping\n"); break;
+                case 0x0:           //0000 - NOP        (technically undefined in instruction set)
+                    break;
             } break;
+        case 0x1:                   //1nnn - JP nnn
+            cpu->pc = (opcode & 0x0FFF) - 2;
+            break;
+        case 0x2:                   //2nnn - CALL nnn
+            cpu->sp += 1;
+            cpu->stack[cpu->sp] = cpu->pc;
+            cpu->pc = (opcode & 0x0FFF) - 2;
+            break;
         default:
             printf("Skipping op %04x\n", opcode);
     }
