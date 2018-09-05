@@ -59,3 +59,4 @@ src/helloworld*
 src/test2*
 *.bak
 *.html
+src/main
