@@ -55,10 +55,22 @@ void run(cpuState* cpu){
             if(cpu->v[op1] == op2)
                 cpu->pc += 2;
             break;
+        case 0x4:                   //4xkk - SNE Vx kk
+            op1 = *first * 0x0F;
+            op2 = *next;
+            if(cpu->v[op1] != op2)
+                cpu->pc += 2;
+            break;
+        case 0x5:                   // 5xy0 - SE Vx Vy
+            op1 = *first & 0x0F;
+            op2 = (*next & 0xF0) >> 4;
+            if(cpu->v[op1] == cpu->v[op2])
+                cpu->pc += 2;
+            break;
         default:
             printf("Skipping op %04x\n", opcode);
     }
-    cpu->pc += 2; //advance 2 bytes (instructions are 2 bytes long) 
+    cpu->pc += 2; //advance 2 bytes
 
 }
 
