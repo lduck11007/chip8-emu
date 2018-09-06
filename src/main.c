@@ -19,13 +19,13 @@ void run(cpuState* cpu){
     unsigned char* next = &cpu->memory[cpu->pc+1];
     unsigned short opcode = *first << 8 | *next; //combine both bytes into single instruction
     unsigned int ident = (*first & 0xF0) >> 4; //First half-byte of opcode, identifier.
-    //printf("%x\t%x\t%x\t%x\t\t%x\n", ident, opcode, *first, *next, cpu->pc);
-    //printf("%d\n", cpu->gfx[3]);
+    unsigned char op1;                        //other stuff
+    unsigned char op2;
     if(opcode == 0) //null opcode
         cpu->nullCount += 1;
     else
         cpu->nullCount = 0;
-    if(cpu->nullCount >= 4) //exit if 4 null bytes in a row
+    if(cpu->nullCount >= 6) //exit if 4 null bytes in a row
         exit(0);
     switch(ident){
         case 0x0: 
@@ -37,8 +37,9 @@ void run(cpuState* cpu){
                     cpu->pc = (cpu->stack[cpu->sp]) - 2; //accounting for increment of pc at end of instruction
                     cpu->sp = 0;
                     break;
-                case 0x0:           //0000 - NOP        (technically undefined in instruction set)
+                case 0x00:          //0000 - NOP        (technically undefined in instruction set)
                     break;
+                case 0xFF: printf("Debug\n"); break;
             } break;
         case 0x1:                   //1nnn - JP nnn
             cpu->pc = (opcode & 0x0FFF) - 2;
@@ -47,6 +48,12 @@ void run(cpuState* cpu){
             cpu->sp += 1;
             cpu->stack[cpu->sp] = cpu->pc;
             cpu->pc = (opcode & 0x0FFF) - 2;
+            break;
+        case 0x3:                   //3xkk - SE Vx kk
+            op1 = *first & 0x0F;
+            op2 = *next;
+            if(cpu->v[op1] == op2)
+                cpu->pc += 2;
             break;
         default:
             printf("Skipping op %04x\n", opcode);
