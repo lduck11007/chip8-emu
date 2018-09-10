@@ -19,6 +19,7 @@ void run(cpuState* cpu){
     unsigned char* next = &cpu->memory[cpu->pc+1];
     unsigned short opcode = *first << 8 | *next; //combine both bytes into single instruction
     unsigned int ident = (*first & 0xF0) >> 4; //First half-byte of opcode, identifier.
+    unsigned char right = *next & 0x0F;
     unsigned char op1;                        //other stuff
     unsigned char op2;
     if(opcode == 0) //null opcode
@@ -35,7 +36,7 @@ void run(cpuState* cpu){
                     break;
                 case 0xEE:          //00EE - RET
                     cpu->pc = (cpu->stack[cpu->sp]) - 2; //accounting for increment of pc at end of instruction
-                    cpu->sp = 0;
+                    cpu->sp -= 1;
                     break;
                 case 0x00:          //0000 - NOP        (technically undefined in instruction set)
                     break;
@@ -56,16 +57,42 @@ void run(cpuState* cpu){
                 cpu->pc += 2;
             break;
         case 0x4:                   //4xkk - SNE Vx kk
-            op1 = *first * 0x0F;
+            op1 = *first & 0x0F;
             op2 = *next;
             if(cpu->v[op1] != op2)
                 cpu->pc += 2;
             break;
-        case 0x5:                   // 5xy0 - SE Vx Vy
+        case 0x5:                   //5xy0 - SE Vx Vy
             op1 = *first & 0x0F;
             op2 = (*next & 0xF0) >> 4;
             if(cpu->v[op1] == cpu->v[op2])
                 cpu->pc += 2;
+            break;
+        case 0x6:                   //6xkk - SE Vx kk
+            op1 = *first & 0x0F;
+            op2 = *next;
+            cpu->v[op1] = op2;
+            break;
+        case 0x7:                   //7xkk - ADD Vx kk
+            op1 = *first & 0x0F;
+            op2 = *next;
+            cpu->v[op1] = cpu->v[op1] + op2;
+            break;
+        case 0x8:
+            switch(right){
+                case 0x0:           //8xy0 - LD Vx Vy
+                    op1 = *first & 0x0F;
+                    op2 = (*next & 0xF0) >> 4;
+                    cpu->v[op1] = cpu->v[op2];
+                    break;
+                case 0x1:           //8xy1 - OR Vx Vy
+                    op1 = *next & 0x0F;
+                    op2 = (*next & 0xF0) >> 4;         //here idiot <--------------
+                    break;
+                default:
+                    printf("Skipping op %04x\n", opcode);
+            }
+
             break;
         default:
             printf("Skipping op %04x\n", opcode);
