@@ -86,8 +86,24 @@ void run(cpuState* cpu){
                     cpu->v[op1] = cpu->v[op2];
                     break;
                 case 0x1:           //8xy1 - OR Vx Vy
-                    op1 = *next & 0x0F;
-                    op2 = (*next & 0xF0) >> 4;         //here idiot <--------------
+                    op1 = *first & 0x0F;
+                    op2 = (*next & 0xF0) >> 4;
+                    cpu->v[op1] = op1 | op2;
+                    break;
+                case 0x2:           //8xy2 - AND Vx Vy
+                    op1 = *first & 0x0F;
+                    op2 = (*next & 0xF0) >> 4;
+                    cpu->v[op1] = op1 & op2;
+                    break;
+                case 0x3:           //8xy3 - XOR Vx Vy
+                    op1 = *first & 0x0F;
+                    op2 = (*next & 0xF0) >> 4;
+                    cpu->v[op1] = op1 ^ op2;
+                    break;
+                case 0x4:           //8xy4 - ADD Vx Vy
+                    op1 = *first & 0x0F;
+                    op2 = (*next * 0xF0) >> 4;
+                                                        //<--- YOU'RE HERE IDIOT
                     break;
                 default:
                     printf("Skipping op %04x\n", opcode);
